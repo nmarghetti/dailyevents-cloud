@@ -5,15 +5,15 @@ exports.uniqueId = function() {
   return shortId.generate().toUpperCase();
 };
 
-exports.getFormattedDate = function(timestamp, timezone) {
-  return toLocalDate(timestamp, timezone).format('YYYYMMDD');
+exports.dateString = function(timestamp, timezone) {
+  return localDate(timestamp, timezone).format('YYYYMMDD');
 }
 
-exports.getFormattedTime = function(timestamp, timezone) {
-  return toLocalDate(timestamp, timezone).format('HHmmssSSS');
+exports.timeString = function(timestamp, timezone) {
+  return localDate(timestamp, timezone).format('HHmmssSSS');
 }
 
-toLocalDate = function(timestamp, timezone) {
+localDate = function(timestamp, timezone) {
   var time = parseInt(timestamp);
   var zone = parseInt(timezone);
   return moment.utc(time).subtract({ m : zone });
