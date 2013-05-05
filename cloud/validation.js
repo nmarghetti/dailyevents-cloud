@@ -1,34 +1,40 @@
+var _ = require('underscore');
+
 var beforeSave = Parse.Cloud.beforeSave;
 
 beforeSave('Group', function(request, response) {
-  ensureContains(request, response, 'code');
-  ensureMaxLength(request, response, 'code', 15);
+  _.each(['code'], function(field) {
+    ensureContains(request, response, field);
+  });
+  _.each({ 'code' : 15 }, function(maxLength, field) {
+    ensureMaxLength(request, response, field, maxLength);
+  });
   response.success();
 });
 
 beforeSave('RSVP', function(request, response) {
-  ensureContains(request, response, 'group');
-  ensureContains(request, response, 'date');
-  ensureLength(request, response, 'date', 8);
-  ensureContains(request, response, 'participant');
-  ensureMaxLength(request, response, 'participant', 20);
-  ensureContains(request, response, 'reply');
-  ensureMaxLength(request, response, 'reply', 3);
-  ensureContains(request, response, 'timestamp');
-  ensureContains(request, response, 'timezone');
+  _.each(['group', 'date', 'participant', 'reply', 'timestamp', 'timezone'], function(field) {
+    ensureContains(request, response, field);
+  });
+  _.each({ 'participant' : 20, 'reply' :  3 }, function(maxLength, field) {
+    ensureMaxLength(request, response, field, maxLength);
+  });
+  _.each({ 'date' : 8 }, function(length, field) {
+    ensureLength(request, response, field, length);
+  });
   response.success();
 });
 
 beforeSave('Comment', function(request, response) {
-  ensureContains(request, response, 'group');
-  ensureContains(request, response, 'date');
-  ensureLength(request, response, 'date', 8);
-  ensureContains(request, response, 'participant');
-  ensureMaxLength(request, response, 'participant', 20);
-  ensureContains(request, response, 'comment');
-  ensureMaxLength(request, response, 'comment', 70);
-  ensureContains(request, response, 'timestamp');
-  ensureContains(request, response, 'timezone');
+  _.each(['group', 'date', 'participant', 'comment', 'timestamp', 'timezone'], function(field) {
+    ensureContains(request, response, field);
+  });
+  _.each({ 'participant' : 20, 'comment' :  70 }, function(maxLength, field) {
+    ensureMaxLength(request, response, field, maxLength);
+  });
+  _.each({ 'date' : 8 }, function(length, field) {
+    ensureLength(request, response, field, length);
+  });
   response.success();
 });
 
