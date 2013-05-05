@@ -52,7 +52,10 @@ findGroup = function(request, response, callback) {
     .equalTo('code', request.params.group)
     .first({
       success : function(group) {
-        callback(group);
+        if (group)
+          callback(group);
+        else
+          response.error('group not found: ' + request.params.group);
       },
       error : function(error) {
         response.error(error);
