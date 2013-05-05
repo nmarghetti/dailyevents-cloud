@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _  = require('underscore');
 
 var beforeSave = Parse.Cloud.beforeSave;
 
@@ -12,7 +12,7 @@ beforeSave('Group', function(request, response) {
   response.success();
 });
 
-beforeSave('RSVP', function(request, response) {
+beforeSave('Status', function(request, response) {
   _.each(['group', 'date', 'participant', 'reply', 'timestamp', 'timezone'], function(field) {
     ensureContains(request, response, field);
   });

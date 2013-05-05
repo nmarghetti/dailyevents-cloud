@@ -4,51 +4,74 @@ import time
 from dailyevents.api import ParseClient
 
 class AcceptanceTest(unittest.TestCase):
-  
-  def test_should_create_group(self):
-    assert self.__createGroup()
-  
-  def test_should_confirm_and_cancel_attendance(self):
-    group = self.__createGroup()
-    self.__rsvp(group, 'tfernandez', 'yes')
-    # TODO Assert one person is attending
-    self.__rsvp(group, 'tfernandez', 'no')
-    # TODO Assert nobody is attending
+    
+    def test_should_create_group(self):
+        assert self.__createGroup()
+    
+    def test_should_confirm_and_cancel_attendance(self):
+        group = self.__createGroup()
+        participants = {
+            'tfernandez' : 'yes',
+            'ewatanabe'  : 'yes',
+            'gliguori'   : 'yes'
+        }
+        for participant, reply in participants.items():
+            self.__setStatus(group, participant, reply)
+        assert len(self.__getStatuses(group)) == len(participants)
+        self.__setStatus(group, 'gliguori', 'no')
+        assert len(self.__getStatuses(group)) == len(participants) - 1
 
-  def test_should_add_comments(self):
-    group = self.__createGroup()
-    self.__addComment(group, 'tfernandez', 'first comment')
-    self.__addComment(group, 'ewatanabe', 'second comment')
-    self.__addComment(group, 'gliguori', 'third comment')
-    # TODO Assert all comments were added
+    def test_should_add_comments(self):
+        group = self.__createGroup()
+        comments = {
+            'tfernandez' : 'first comment',
+            'ewatanabe'  : 'second comment',
+            'gliguori'   : 'third comment'
+        }
+        for participant, comment in comments.items():
+            self.__addComment(group, participant, comment)
+        assert len(self.__getComments(group)) == len(comments)
 
-  def __createGroup(self):
-    response = self.__function('createGroup')
-    return response['result']['code']
+    def __createGroup(self):
+        response = self.__function('createGroup')
+        return response['result']['code']
 
-  def __rsvp(self, group, participant, reply):
-    return self.__function('rsvp', {
-        'group'       : group,
-        'timestamp'   : self.__timestamp(),
-        'timezone'    : self.__timezone(),
-        'participant' : participant,
-        'reply'       : reply
-      })
+    def __setStatus(self, group, participant, reply):
+        return self.__function('setStatus', {
+                'group'       : group,
+                'participant' : participant,
+                'reply'       : reply,
+                'timestamp'   : self.__timestamp(),
+                'timezone'    : self.__timezone()
+            })
 
-  def __addComment(self, group, participant, comment):
-    return self.__function('addComment', {
-        'group'       : group,
-        'timestamp'   : self.__timestamp(),
-        'timezone'    : self.__timezone(),
-        'participant' : participant,
-        'comment'     : comment
-      })
+    def __addComment(self, group, participant, comment):
+        return self.__function('addComment', {
+                'group'       : group,
+                'participant' : participant,
+                'comment'     : comment,
+                'timestamp'   : self.__timestamp(),
+                'timezone'    : self.__timezone()
+            })
 
-  def __function(self, name, params={}):
-    return ParseClient().call_function(name, params)
+    def __getStatuses(self, group):
+        return self.__getDetails(group)['statuses']
 
-  def __timestamp(self):
-    return str(time.time() * 1000)
+    def __getComments(self, group):
+        return self.__getDetails(group)['comments']
 
-  def __timezone(self):
-    return str(time.altzone / 60)
+    def __getDetails(self, group):
+        return self.__function('getDetails', {
+                'group'     : group,
+                'timestamp' : self.__timestamp(),
+                'timezone'  : self.__timezone()
+            })['result']
+
+    def __function(self, name, params={}):
+        return ParseClient().call_function(name, params)
+
+    def __timestamp(self):
+        return str(time.time() * 1000)
+
+    def __timezone(self):
+        return str(time.altzone / 60)

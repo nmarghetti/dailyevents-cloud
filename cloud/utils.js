@@ -1,5 +1,5 @@
-var shortId = require('cloud/modules/shortid'),
-    moment  = require('moment');
+var  moment = require('moment'),
+    shortId = require('cloud/modules/shortid');
 
 exports.uniqueId = function() {
   return shortId.generate().toUpperCase();
