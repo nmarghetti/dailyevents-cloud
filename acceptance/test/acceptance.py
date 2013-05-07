@@ -6,7 +6,9 @@ from dailyevents.api import ParseClient
 class AcceptanceTest(unittest.TestCase):
     
     def test_should_create_group(self):
-        assert self.__createGroup()
+        group = self.__createGroup()
+        assert group
+        assert self.__getGroup(group)['code']
     
     def test_should_confirm_and_cancel_attendance(self):
         group = self.__createGroup()
@@ -18,8 +20,11 @@ class AcceptanceTest(unittest.TestCase):
         for participant, reply in participants.items():
             self.__setStatus(group, participant, reply)
         assert len(self.__getStatuses(group)) == len(participants)
+        
         self.__setStatus(group, 'gliguori', 'no')
-        assert len(self.__getStatuses(group)) == len(participants) - 1
+        statuses = self.__getStatuses(group)
+        assert len(statuses) == len(participants)
+        assert statuses[len(statuses) - 1]['reply'] == 'no'
 
     def test_should_add_comments(self):
         group = self.__createGroup()
@@ -34,7 +39,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def __createGroup(self):
         response = self.__function('createGroup')
-        return response['result']['code']
+        return response['result']['id']
 
     def __setStatus(self, group, participant, reply):
         return self.__function('setStatus', {
@@ -55,16 +60,21 @@ class AcceptanceTest(unittest.TestCase):
             })
 
     def __getStatuses(self, group):
-        return self.__getDetails(group)['statuses']
+        return self.__getGroupDetails(group)['statuses']
 
     def __getComments(self, group):
-        return self.__getDetails(group)['comments']
+        return self.__getGroupDetails(group)['comments']
 
-    def __getDetails(self, group):
-        return self.__function('getDetails', {
+    def __getGroupDetails(self, group):
+        return self.__function('getGroupDetails', {
                 'group'     : group,
                 'timestamp' : self.__timestamp(),
                 'timezone'  : self.__timezone()
+            })['result']
+
+    def __getGroup(self, group):
+        return self.__function('getGroup', {
+                'group' : group
             })['result']
 
     def __function(self, name, params={}):

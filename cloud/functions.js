@@ -1,4 +1,4 @@
-var    _  = require('underscore'),
+var     _ = require('underscore'),
     utils = require('cloud/utils');
 
 var define = Parse.Cloud.define;
@@ -8,7 +8,7 @@ define('createGroup', function(request, response) {
       code : utils.uniqueId()
     }, {
     success: function(group) {
-      response.success({ code : group.get('code') });
+      response.success({ id : group.id });
     },
     error: function(group, error) {
       response.error(error);
@@ -17,90 +17,86 @@ define('createGroup', function(request, response) {
 });
 
 define('setStatus', function(request, response) {
-  findGroup(request, response, function(group) {
-    findStatus(request, response, function(status) {
-      var params = requestParams(request);
-      status.save({
-          group       : params.group,
-          date        : params.date,
-          participant : params.participant,
-          reply       : params.reply,
-          timestamp   : params.timestamp,
-          timezone    : params.timezone
-        }, {
-        success: function(status) {
-          response.success();
-        },
-        error: function(status, error) {
-          response.error(error);
-        }
-      });
-    });
-  });
-});
-
-define('addComment', function(request, response) {
-  findGroup(request, response, function(group) {
-    var params  = requestParams(request);
-    new Parse.Object('Comment').save({
+  findStatus(request, response, function(status) {
+    var params = requestParams(request);
+    status.save({
         group       : params.group,
         date        : params.date,
         participant : params.participant,
-        comment     : params.comment,
+        reply       : params.reply,
         timestamp   : params.timestamp,
         timezone    : params.timezone
       }, {
-      success: function(comment) {
+      success: function(status) {
         response.success();
       },
-      error: function(comment, error) {
+      error: function(status, error) {
         response.error(error);
       }
     });
   });
 });
 
-define('getDetails', function(request, response) {
+define('addComment', function(request, response) {
+  var params  = requestParams(request);
+  new Parse.Object('Comment').save({
+      group       : params.group,
+      date        : params.date,
+      participant : params.participant,
+      comment     : params.comment,
+      timestamp   : params.timestamp,
+      timezone    : params.timezone
+    }, {
+    success: function(comment) {
+      response.success();
+    },
+    error: function(comment, error) {
+      response.error(error);
+    }
+  });
+});
+
+define('getGroup', function(request, response) {
   findGroup(request, response, function(group) {
-    var details = {};
-    listStatuses(request, response, function(statuses) {
-      details.statuses = [];
-      _.each(statuses, function(status) {
-        if (status.get('reply') == 'yes')
-          details.statuses.push({
-            participant : status.get('participant'),
-            timestamp   : status.get('timestamp'),
-            timezone    : status.get('timezone')
-          });
+    response.success({ code : group.get('code') });
+  });
+});
+
+define('getGroupDetails', function(request, response) {
+  var details = {};
+  listStatuses(request, response, function(statuses) {
+    details.statuses = [];
+    _.each(statuses, function(status) {
+      details.statuses.push({
+        participant : status.get('participant'),
+        reply       : status.get('reply'),
+        timestamp   : status.get('timestamp'),
+        timezone    : status.get('timezone')
       });
-      listComments(request, response, function(comments) {
-        details.comments = [];
-        _.each(comments, function(comment) {
-          details.comments.push({
-            participant : comment.get('participant'),
-            comment     : comment.get('comment'),
-            timestamp   : comment.get('timestamp'),
-            timezone    : comment.get('timezone')
-          });
+    });
+    listComments(request, response, function(comments) {
+      details.comments = [];
+      _.each(comments, function(comment) {
+        details.comments.push({
+          participant : comment.get('participant'),
+          comment     : comment.get('comment'),
+          timestamp   : comment.get('timestamp'),
+          timezone    : comment.get('timezone')
         });
-        response.success(details);
       });
+      response.success(details);
     });
   });
 });
 
 findGroup = function(request, response, callback) {
   new Parse.Query('Group')
-    .equalTo('code', request.params.group)
-    .first({
+    .get(request.params.group, {
       success : function(group) {
-        if (group) {
-          request.params.group = group.id;
+        if (group)
           callback(group);
-        }
-        else {
+        else
           response.error('group not found: ' + request.params.group);
-        }
       },
       error : function(error) {
         response.error(error);
@@ -130,6 +126,7 @@ listStatuses = function(request, response, callback) {
   new Parse.Query('Status')
     .equalTo('group', params.group)
     .equalTo('date', params.date)
+    .ascending('updatedAt')
     .find({
       success : function(statuses) {
         callback(statuses);
@@ -145,6 +142,7 @@ listComments = function(request, response, callback) {
   new Parse.Query('Comment')
     .equalTo('group', params.group)
     .equalTo('date', params.date)
+    .ascending('createdAt')
     .find({
       success : function(comments) {
         callback(comments);
