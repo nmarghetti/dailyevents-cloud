@@ -5,7 +5,8 @@ var define = Parse.Cloud.define;
 
 define('createGroup', function(request, response) {
   new Parse.Object('Group').save({
-      code : utils.uniqueId()
+      code : utils.uniqueId(),
+      name : request.params.name
     }, {
     success: function(group) {
       response.success({ id : group.id });
@@ -13,6 +14,15 @@ define('createGroup', function(request, response) {
     error: function(group, error) {
       response.error(error);
     }
+  });
+});
+
+define('getGroup', function(request, response) {
+  findGroup(request, response, function(group) {
+    response.success({
+      code : group.get('code'),
+      name : group.get('name')
+    });
   });
 });
 
@@ -56,13 +66,7 @@ define('addComment', function(request, response) {
   });
 });
 
-define('getGroup', function(request, response) {
-  findGroup(request, response, function(group) {
-    response.success({ code : group.get('code') });
-  });
-});
-
-define('getGroupDetails', function(request, response) {
+define('getEvent', function(request, response) {
   var details = {};
   listStatuses(request, response, function(statuses) {
     details.statuses = [];
@@ -96,7 +100,7 @@ findGroup = function(request, response, callback) {
         if (group)
           callback(group);
         else
-          response.error('group not found: ' + request.params.group);
+          response.error('group not found');
       },
       error : function(error) {
         response.error(error);

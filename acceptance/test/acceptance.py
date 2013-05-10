@@ -9,6 +9,7 @@ class AcceptanceTest(unittest.TestCase):
         group = self.__createGroup()
         assert group
         assert self.__getGroup(group)['code']
+        assert self.__getGroup(group)['name']
     
     def test_should_confirm_and_cancel_attendance(self):
         group = self.__createGroup()
@@ -38,8 +39,15 @@ class AcceptanceTest(unittest.TestCase):
         assert len(self.__getComments(group)) == len(comments)
 
     def __createGroup(self):
-        response = self.__function('createGroup')
+        response = self.__function('createGroup', {
+                'name' : 'Test'
+            })
         return response['result']['id']
+
+    def __getGroup(self, group):
+        return self.__function('getGroup', {
+                'group' : group
+            })['result']
 
     def __setStatus(self, group, participant, reply):
         return self.__function('setStatus', {
@@ -60,21 +68,16 @@ class AcceptanceTest(unittest.TestCase):
             })
 
     def __getStatuses(self, group):
-        return self.__getGroupDetails(group)['statuses']
+        return self.__getEvent(group)['statuses']
 
     def __getComments(self, group):
-        return self.__getGroupDetails(group)['comments']
+        return self.__getEvent(group)['comments']
 
-    def __getGroupDetails(self, group):
-        return self.__function('getGroupDetails', {
+    def __getEvent(self, group):
+        return self.__function('getEvent', {
                 'group'     : group,
                 'timestamp' : self.__timestamp(),
                 'timezone'  : self.__timezone()
-            })['result']
-
-    def __getGroup(self, group):
-        return self.__function('getGroup', {
-                'group' : group
             })['result']
 
     def __function(self, name, params={}):

@@ -3,10 +3,10 @@ var _  = require('underscore');
 var beforeSave = Parse.Cloud.beforeSave;
 
 beforeSave('Group', function(request, response) {
-  _.each(['code'], function(field) {
+  _.each(['code', 'name'], function(field) {
     ensureContains(request, response, field);
   });
-  _.each({ 'code' : 15 }, function(maxLength, field) {
+  _.each({ 'code' : 15, 'name' : 30 }, function(maxLength, field) {
     ensureMaxLength(request, response, field, maxLength);
   });
   response.success();
