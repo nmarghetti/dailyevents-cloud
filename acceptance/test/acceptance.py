@@ -6,41 +6,42 @@ from dailyevents.api import ParseClient
 class AcceptanceTest(unittest.TestCase):
     
     def test_should_create_group(self):
-        group = self.__createGroup()
-        assert group
-        assert self.__getGroup(group)['code']
-        assert self.__getGroup(group)['name']
+        groupId = self.__createGroup()
+        assert groupId
+        group = self.__getGroup(groupId)
+        assert group['code']
+        assert group['name']
     
     def test_should_confirm_and_cancel_attendance(self):
-        group = self.__createGroup()
+        groupId = self.__createGroup()
         participants = {
             'tfernandez' : 'yes',
             'ewatanabe'  : 'yes',
             'gliguori'   : 'yes'
         }
         for participant, reply in participants.items():
-            self.__setStatus(group, participant, reply)
-        assert len(self.__getStatuses(group)) == len(participants)
+            self.__setStatus(groupId, participant, reply)
+        assert len(self.__getStatuses(groupId)) == len(participants)
         
-        self.__setStatus(group, 'gliguori', 'no')
-        statuses = self.__getStatuses(group)
+        self.__setStatus(groupId, 'gliguori', 'no')
+        statuses = self.__getStatuses(groupId)
         assert len(statuses) == len(participants)
         assert statuses[len(statuses) - 1]['reply'] == 'no'
 
     def test_should_add_comments(self):
-        group = self.__createGroup()
+        groupId = self.__createGroup()
         comments = {
             'tfernandez' : 'first comment',
             'ewatanabe'  : 'second comment',
             'gliguori'   : 'third comment'
         }
         for participant, comment in comments.items():
-            self.__addComment(group, participant, comment)
-        assert len(self.__getComments(group)) == len(comments)
+            self.__addComment(groupId, participant, comment)
+        assert len(self.__getComments(groupId)) == len(comments)
 
     def __createGroup(self):
         response = self.__function('createGroup', {
-                'name' : 'Test'
+                'name' : 'Acceptance Test'
             })
         return response['result']['id']
 

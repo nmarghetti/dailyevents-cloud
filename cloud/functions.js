@@ -18,12 +18,21 @@ define('createGroup', function(request, response) {
 });
 
 define('getGroup', function(request, response) {
-  findGroup(request, response, function(group) {
-    response.success({
-      code : group.get('code'),
-      name : group.get('name')
+  new Parse.Query('Group')
+    .get(request.params.group, {
+      success : function(group) {
+        if (group)
+          response.success({
+            code : group.get('code'),
+            name : group.get('name')
+          });
+        else
+          response.error('group not found');
+      },
+      error : function(error) {
+        response.error(error);
+      }
     });
-  });
 });
 
 define('setStatus', function(request, response) {
@@ -92,21 +101,6 @@ define('getEvent', function(request, response) {
     });
   });
 });
-
-findGroup = function(request, response, callback) {
-  new Parse.Query('Group')
-    .get(request.params.group, {
-      success : function(group) {
-        if (group)
-          callback(group);
-        else
-          response.error('group not found');
-      },
-      error : function(error) {
-        response.error(error);
-      }
-    });
-};
 
 findStatus = function(request, response, callback) {
   var params = requestParams(request);
