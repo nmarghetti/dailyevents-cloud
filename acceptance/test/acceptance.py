@@ -47,13 +47,13 @@ class AcceptanceTest(unittest.TestCase):
         return response['result']['id']
 
     def __getGroupById(self, group):
-        return self.__function('getGroup', {
+        return self.__function('getGroupById', {
                 'group' : group
             })['result']
 
     def __getGroupByCode(self, group):
-        return self.__function('getGroup', {
-                'code' : group
+        return self.__function('getGroupByCode', {
+                'group' : group
             })['result']
 
     def __setStatus(self, group, participant, reply):
