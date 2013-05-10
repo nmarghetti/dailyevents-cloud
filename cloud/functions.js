@@ -18,21 +18,33 @@ define('createGroup', function(request, response) {
 });
 
 define('getGroup', function(request, response) {
-  new Parse.Query('Group')
-    .get(request.params.group, {
-      success : function(group) {
-        if (group)
+  if (request.params.group)
+    new Parse.Query('Group')
+      .get(request.params.group, {
+        success : function(group) {
           response.success({
             code : group.get('code'),
             name : group.get('name')
           });
-        else
-          response.error('group not found');
-      },
-      error : function(error) {
-        response.error(error);
-      }
-    });
+        },
+        error : function(error) {
+          response.error(error);
+        }
+      });
+  else
+    new Parse.Query('Group')
+      .equalTo('code', request.params.code)
+      .first({
+        success : function(group) {
+          response.success({
+            id   : group.id,
+            name : group.get('name')
+          });
+        },
+        error : function(error) {
+          response.error(error);
+        }
+      });
 });
 
 define('setStatus', function(request, response) {

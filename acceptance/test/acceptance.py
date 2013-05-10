@@ -8,9 +8,10 @@ class AcceptanceTest(unittest.TestCase):
     def test_should_create_group(self):
         groupId = self.__createGroup()
         assert groupId
-        group = self.__getGroup(groupId)
+        group = self.__getGroupById(groupId)
         assert group['code']
-        assert group['name']
+        group = self.__getGroupByCode(group['code'])
+        assert group['id']
     
     def test_should_confirm_and_cancel_attendance(self):
         groupId = self.__createGroup()
@@ -45,9 +46,14 @@ class AcceptanceTest(unittest.TestCase):
             })
         return response['result']['id']
 
-    def __getGroup(self, group):
+    def __getGroupById(self, group):
         return self.__function('getGroup', {
                 'group' : group
+            })['result']
+
+    def __getGroupByCode(self, group):
+        return self.__function('getGroup', {
+                'code' : group
             })['result']
 
     def __setStatus(self, group, participant, reply):
