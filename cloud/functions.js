@@ -21,10 +21,13 @@ define('getGroupById', function(request, response) {
   new Parse.Query('Group')
     .get(request.params.group, {
       success : function(group) {
-        response.success({
-          code : group.get('code'),
-          name : group.get('name')
-        });
+        if (group)
+          response.success({
+            code : group.get('code'),
+            name : group.get('name')
+          });
+        else
+          response.success({});
       },
       error : function(error) {
         response.error(error);
@@ -37,10 +40,13 @@ define('getGroupByCode', function(request, response) {
     .equalTo('code', request.params.group)
     .first({
       success : function(group) {
-        response.success({
-          id   : group.id,
-          name : group.get('name')
-        });
+        if (group)
+          response.success({
+            id   : group.id,
+            name : group.get('name')
+          });
+        else
+          response.success({});
       },
       error : function(error) {
         response.error(error);
