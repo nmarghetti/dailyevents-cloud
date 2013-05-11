@@ -1,0 +1,14 @@
+{
+  "name"    : "dailyevents",
+  "version" : "1.0.0",
+  "private" : true,
+
+  "dependencies" : {
+    "connect-redis" : "",
+    "date-utils" : "",
+    "express" : "",
+    "jade" : "",
+    "redis" : "",
+    "shortid" : ""
+  }
+}

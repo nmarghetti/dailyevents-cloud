@@ -1,0 +1,9 @@
+---
+applications:
+- name: dailyevents
+  framework: node
+  runtime: node08
+  memory: 512M
+  instances: 1
+  url: dailyevents.cloudfoundry.com
+  path: .
