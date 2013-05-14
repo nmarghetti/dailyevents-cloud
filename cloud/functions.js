@@ -55,9 +55,10 @@ define('getGroupByCode', function(request, response) {
 });
 
 define('setStatus', function(request, response) {
-  findStatus(request, response, function(status) {
+  fetchStatus(request, response, function(status) {
     var params = resolveParams(request);
     status.save({
+        clientId    : params.clientId,
         groupId     : params.groupId,
         date        : params.date,
         participant : params.participant,
@@ -78,6 +79,7 @@ define('setStatus', function(request, response) {
 define('addComment', function(request, response) {
   var params  = resolveParams(request);
   new Parse.Object('Comment').save({
+      clientId    : params.clientId,
       groupId     : params.groupId,
       date        : params.date,
       participant : params.participant,
@@ -121,12 +123,12 @@ define('getEvent', function(request, response) {
   });
 });
 
-findStatus = function(request, response, callback) {
+fetchStatus = function(request, response, callback) {
   var params = resolveParams(request);
   new Parse.Query('Status')
+    .equalTo('clientId', params.clientId)
     .equalTo('groupId', params.groupId)
     .equalTo('date', params.date)
-    .equalTo('participant', params.participant)
     .first({
       success : function(status) {
         status = status || new Parse.Object('Status');

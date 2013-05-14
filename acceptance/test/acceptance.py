@@ -21,10 +21,10 @@ class AcceptanceTest(unittest.TestCase):
             'gliguori'   : 'yes'
         }
         for participant, reply in participants.items():
-            self.__setStatus(groupId, participant, reply)
+            self.__setStatus(participant + '-device', groupId, participant, reply)
         assert len(self.__getStatuses(groupId)) == len(participants)
         
-        self.__setStatus(groupId, 'gliguori', 'no')
+        self.__setStatus('gliguori-device', groupId, 'gliguori', 'no')
         statuses = self.__getStatuses(groupId)
         assert len(statuses) == len(participants)
         assert statuses[len(statuses) - 1]['reply'] == 'no'
@@ -56,8 +56,9 @@ class AcceptanceTest(unittest.TestCase):
                 'code' : groupCode
             })['result']
 
-    def __setStatus(self, groupId, participant, reply):
+    def __setStatus(self, clientId, groupId, participant, reply):
         return self.__function('setStatus', {
+                'clientId'    : clientId,
                 'groupId'     : groupId,
                 'participant' : participant,
                 'reply'       : reply,
@@ -67,6 +68,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def __addComment(self, groupId, participant, comment):
         return self.__function('addComment', {
+                'clientId'    : 'test-device',
                 'groupId'     : groupId,
                 'participant' : participant,
                 'comment'     : comment,
