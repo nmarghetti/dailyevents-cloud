@@ -46,43 +46,43 @@ class AcceptanceTest(unittest.TestCase):
             })
         return response['result']['id']
 
-    def __getGroupById(self, group):
+    def __getGroupById(self, groupId):
         return self.__function('getGroupById', {
-                'group' : group
+                'id' : groupId
             })['result']
 
-    def __getGroupByCode(self, group):
+    def __getGroupByCode(self, groupCode):
         return self.__function('getGroupByCode', {
-                'group' : group
+                'code' : groupCode
             })['result']
 
-    def __setStatus(self, group, participant, reply):
+    def __setStatus(self, groupId, participant, reply):
         return self.__function('setStatus', {
-                'group'       : group,
+                'groupId'     : groupId,
                 'participant' : participant,
                 'reply'       : reply,
                 'timestamp'   : self.__timestamp(),
                 'timezone'    : self.__timezone()
             })
 
-    def __addComment(self, group, participant, comment):
+    def __addComment(self, groupId, participant, comment):
         return self.__function('addComment', {
-                'group'       : group,
+                'groupId'     : groupId,
                 'participant' : participant,
                 'comment'     : comment,
                 'timestamp'   : self.__timestamp(),
                 'timezone'    : self.__timezone()
             })
 
-    def __getStatuses(self, group):
-        return self.__getEvent(group)['statuses']
+    def __getStatuses(self, groupId):
+        return self.__getEvent(groupId)['statuses']
 
-    def __getComments(self, group):
-        return self.__getEvent(group)['comments']
+    def __getComments(self, groupId):
+        return self.__getEvent(groupId)['comments']
 
-    def __getEvent(self, group):
+    def __getEvent(self, groupId):
         return self.__function('getEvent', {
-                'group'     : group,
+                'groupId'   : groupId,
                 'timestamp' : self.__timestamp(),
                 'timezone'  : self.__timezone()
             })['result']

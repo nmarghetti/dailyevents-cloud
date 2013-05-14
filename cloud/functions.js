@@ -19,7 +19,7 @@ define('createGroup', function(request, response) {
 
 define('getGroupById', function(request, response) {
   new Parse.Query('Group')
-    .get(request.params.group, {
+    .get(request.params.id, {
       success : function(group) {
         if (group)
           response.success({
@@ -29,7 +29,7 @@ define('getGroupById', function(request, response) {
         else
           response.success({});
       },
-      error : function(error) {
+      error : function(group, error) {
         response.error(error);
       }
     });
@@ -37,7 +37,7 @@ define('getGroupById', function(request, response) {
 
 define('getGroupByCode', function(request, response) {
   new Parse.Query('Group')
-    .equalTo('code', request.params.group)
+    .equalTo('code', request.params.code)
     .first({
       success : function(group) {
         if (group)
@@ -56,9 +56,9 @@ define('getGroupByCode', function(request, response) {
 
 define('setStatus', function(request, response) {
   findStatus(request, response, function(status) {
-    var params = requestParams(request);
+    var params = resolveParams(request);
     status.save({
-        group       : params.group,
+        groupId     : params.groupId,
         date        : params.date,
         participant : params.participant,
         reply       : params.reply,
@@ -76,9 +76,9 @@ define('setStatus', function(request, response) {
 });
 
 define('addComment', function(request, response) {
-  var params  = requestParams(request);
+  var params  = resolveParams(request);
   new Parse.Object('Comment').save({
-      group       : params.group,
+      groupId     : params.groupId,
       date        : params.date,
       participant : params.participant,
       comment     : params.comment,
@@ -122,9 +122,9 @@ define('getEvent', function(request, response) {
 });
 
 findStatus = function(request, response, callback) {
-  var params = requestParams(request);
+  var params = resolveParams(request);
   new Parse.Query('Status')
-    .equalTo('group', params.group)
+    .equalTo('groupId', params.groupId)
     .equalTo('date', params.date)
     .equalTo('participant', params.participant)
     .first({
@@ -139,9 +139,9 @@ findStatus = function(request, response, callback) {
 };
 
 listStatuses = function(request, response, callback) {
-  var params = requestParams(request);
+  var params = resolveParams(request);
   new Parse.Query('Status')
-    .equalTo('group', params.group)
+    .equalTo('groupId', params.groupId)
     .equalTo('date', params.date)
     .ascending('updatedAt')
     .find({
@@ -155,9 +155,9 @@ listStatuses = function(request, response, callback) {
 };
 
 listComments = function(request, response, callback) {
-  var params = requestParams(request);
+  var params = resolveParams(request);
   new Parse.Query('Comment')
-    .equalTo('group', params.group)
+    .equalTo('groupId', params.groupId)
     .equalTo('date', params.date)
     .ascending('createdAt')
     .find({
@@ -170,7 +170,7 @@ listComments = function(request, response, callback) {
     });
 };
 
-requestParams = function(request) {
+resolveParams = function(request) {
   var params  = request.params;
   params.date = utils.dateString(params.timestamp, params.timezone);
   return params;

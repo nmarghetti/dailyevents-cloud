@@ -13,7 +13,7 @@ beforeSave('Group', function(request, response) {
 });
 
 beforeSave('Status', function(request, response) {
-  _.each(['group', 'date', 'participant', 'reply', 'timestamp', 'timezone'], function(field) {
+  _.each(['groupId', 'date', 'participant', 'reply', 'timestamp', 'timezone'], function(field) {
     ensureContains(request, response, field);
   });
   _.each({ 'participant' : 20, 'reply' :  3 }, function(maxLength, field) {
@@ -26,7 +26,7 @@ beforeSave('Status', function(request, response) {
 });
 
 beforeSave('Comment', function(request, response) {
-  _.each(['group', 'date', 'participant', 'comment', 'timestamp', 'timezone'], function(field) {
+  _.each(['groupId', 'date', 'participant', 'comment', 'timestamp', 'timezone'], function(field) {
     ensureContains(request, response, field);
   });
   _.each({ 'participant' : 20, 'comment' :  140 }, function(maxLength, field) {
