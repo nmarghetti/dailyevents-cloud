@@ -5,7 +5,7 @@ from dailyevents.api import ParseClient
 
 class AcceptanceTest(unittest.TestCase):
     
-    def test_should_create_group(self):
+    def test_should_create_and_retrieve_group(self):
         groupId = self.__createGroup()
         assert groupId
         group = self.__getGroupById(groupId)
