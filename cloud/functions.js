@@ -38,12 +38,12 @@ define('getGroupById', function(request, response) {
 define('getGroupByCode', function(request, response) {
   new Parse.Query('Group')
     .equalTo('code', request.params.code)
-    .first({
-      success : function(group) {
-        if (group)
+    .find({
+      success : function(groups) {
+        if (groups.length == 1)
           response.success({
-            id   : group.id,
-            name : group.get('name')
+            id   : groups[0].id,
+            name : groups[0].get('name')
           });
         else
           response.success({});
@@ -129,10 +129,12 @@ fetchStatus = function(request, response, callback) {
     .equalTo('clientId', params.clientId)
     .equalTo('groupId', params.groupId)
     .equalTo('date', params.date)
-    .first({
-      success : function(status) {
-        status = status || new Parse.Object('Status');
-        callback(status);
+    .find({
+      success : function(statuses) {
+        if (statuses.length == 1)
+          callback(statuses[0]);
+        else
+          callback(new Parse.Object('Status'));
       },
       error : function(error) {
         response.error(error);
