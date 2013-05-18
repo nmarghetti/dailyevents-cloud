@@ -36,8 +36,9 @@ define('getGroupById', function(request, response) {
 });
 
 define('getGroupByCode', function(request, response) {
+  var code = request.params.code || '';
   new Parse.Query('Group')
-    .equalTo('code', request.params.code)
+    .equalTo('code', code.toUpperCase())
     .find({
       success : function(groups) {
         if (groups.length == 1)
