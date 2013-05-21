@@ -1,4 +1,5 @@
 import unittest
+import platform
 import time
 
 from dailyevents.api import ParseClient
@@ -46,7 +47,7 @@ class AcceptanceTest(unittest.TestCase):
 
     def __register(self):
         response = self.__function('register', {
-                'environment' : 'OS X 10.8.3'
+                'environment' : platform.platform()
             })
         return response['result']['id']
 
