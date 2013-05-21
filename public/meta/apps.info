@@ -1,4 +1,10 @@
 {
+  "donation_url" : "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=3NLLLDBPUFAT4&lc=FR&item_name=Daily%20Events&item_number=Daily%20Events&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted",
+
+  "feedback_url" : "mailto:tiago.fernandez@gmail.com",
+  
+  "marketing_url" : "http://dailyevents.parseapp.com",
+  
   "windows" : {
     "latest_version" : "0.9.0"
   }
