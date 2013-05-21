@@ -4,6 +4,10 @@ import time
 from dailyevents.api import ParseClient
 
 class AcceptanceTest(unittest.TestCase):
+
+    def test_should_register_new_user(self):
+        clientId = self.__register()
+        assert clientId
     
     def test_should_create_and_retrieve_group(self):
         groupId = self.__createGroup()
@@ -39,6 +43,12 @@ class AcceptanceTest(unittest.TestCase):
         for participant, comment in comments.items():
             self.__addComment(groupId, participant, comment)
         assert len(self.__getComments(groupId)) == len(comments)
+
+    def __register(self):
+        response = self.__function('register', {
+                'environment' : 'OS X 10.8.3'
+            })
+        return response['result']['id']
 
     def __createGroup(self):
         response = self.__function('createGroup', {

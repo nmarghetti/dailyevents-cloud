@@ -3,6 +3,19 @@ var     _ = require('underscore'),
 
 var define = Parse.Cloud.define;
 
+define('register', function(request, response) {
+  new Parse.Object('Client').save({
+      environment : request.params.environment
+    }, {
+    success: function(client) {
+      response.success({ id : client.id });
+    },
+    error: function(client, error) {
+      response.error(error);
+    }
+  });
+});
+
 define('createGroup', function(request, response) {
   new Parse.Object('Group').save({
       code : utils.uniqueId(),

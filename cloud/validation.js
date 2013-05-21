@@ -2,6 +2,13 @@ var _  = require('underscore');
 
 var beforeSave = Parse.Cloud.beforeSave;
 
+beforeSave('Client', function(request, response) {
+  _.each(['environment'], function(field) {
+    ensureContains(request, response, field);
+  });
+  response.success();
+});
+
 beforeSave('Group', function(request, response) {
   _.each(['code', 'name'], function(field) {
     ensureContains(request, response, field);
