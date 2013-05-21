@@ -36,7 +36,7 @@ beforeSave('Comment', function(request, response) {
   _.each(['clientId', 'groupId', 'date', 'participant', 'comment', 'timestamp', 'timezone'], function(field) {
     ensureContains(request, response, field);
   });
-  _.each({ 'participant' : 20, 'comment' :  140 }, function(maxLength, field) {
+  _.each({ 'participant' : 20, 'comment' :  70 }, function(maxLength, field) {
     ensureMaxLength(request, response, field, maxLength);
   });
   _.each({ 'date' : 8 }, function(length, field) {
