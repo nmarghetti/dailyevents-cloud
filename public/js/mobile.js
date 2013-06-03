@@ -14,29 +14,36 @@ function registerClient() {
   data.clientId = $.cookie("clientId");
   if (!data.clientId)
     Parse.Cloud.run('register', { environment : navigator.userAgent }, {
-      success: function(result) {
+      success : function(result) {
         data.clientId = result.id;
         $.cookie("clientId", data.clientId, { expires : 3650 });
       },
-      error: function(error) {
+      error : function(error) {
         // TODO Show error message
       }
     });
 }
 
 function refreshGroup() {
-  Parse.Cloud.run('getGroupByCode', { code : data.groupCode }, {
-    success: function(result) {
-      data.groupId   = result.id;
-      data.groupName = result.name;
-      document.title = data.groupName;
-      $('#title').text(data.groupName);
-      refreshEvent();
-    },
-    error: function(error) {
-      // TODO Show error message
-    }
-  });
+  if (data.groupCode)
+    Parse.Cloud.run('getGroupByCode', { code : data.groupCode }, {
+      success : function(result) {
+        if (result.id) {
+          data.groupId   = result.id;
+          data.groupName = result.name;
+          document.title = data.groupName;
+          $('#title').text(data.groupName);
+          refreshEvent();
+        }
+        else {
+          data.groupCode = null;
+          enableOrDisableButtons();
+        }
+      },
+      error : function(error) {
+        // TODO Show error message
+      }
+    });
 }
 
 function refreshEvent() {
@@ -46,7 +53,7 @@ function refreshEvent() {
       timestamp : today.getTime(),
       timezone  : today.getTimezoneOffset()
     }, {
-    success: function(result) {
+    success : function(result) {
       var statuses = result.statuses;
       $("#participants").empty();
       for (var i in statuses) {
@@ -86,10 +93,10 @@ function setStatus(reply) {
       timestamp   : getTimestamp(),
       timezone    : getTimezone()
     }, {
-    success: function(result) {
+    success : function(result) {
       refreshEvent();
     },
-    error: function(error) {
+    error : function(error) {
       // TODO Show error message
     }
   });
@@ -106,11 +113,11 @@ function addComment() {
         timestamp   : getTimestamp(),
         timezone    : getTimezone()
       }, {
-      success: function(result) {
+      success : function(result) {
         $("#comment").val('');
         refreshEvent();
       },
-      error: function(error) {
+      error : function(error) {
         // TODO Show error message
       }
     });
@@ -121,7 +128,17 @@ function readQueryParameters() {
   $('#display_name').val($.url().param('name'));
 }
 
-function enableFieldsValidation() {
+function enableOrDisableButtons() {
+  var buttons = [$('#refresh'), $('#reply_yes'), $('#reply_no'), $('#add_comment')];
+  for (var i in buttons) {
+    if (data.groupCode)
+      buttons[i].removeClass('ui-disabled');
+    else
+      buttons[i].addClass('ui-disabled');
+  }
+}
+
+function activateFieldValidation() {
   var checkMaxLength = function(event) {
     var value = $(this).val();
     var maxLength = $(this).attr('maxlength');
@@ -162,14 +179,15 @@ function getTimezone() {
   return new Date().getTimezoneOffset().toString();
 }
 
-function toTwoDigits(value) {
-  return value < 10 ? '0' + value : value;
+function toTwoDigits(intValue) {
+  return intValue < 10 ? '0' + intValue : intValue;
 }
 
 $(document).ready(function() {
   registerClient();
-  enableFieldsValidation();
   readQueryParameters();
+  activateFieldValidation();
+  enableOrDisableButtons();
   refreshGroup();
   bindActions();
 });
