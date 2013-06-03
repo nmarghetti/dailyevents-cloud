@@ -71,15 +71,18 @@ define('getGroupByCode', function(request, response) {
 define('setStatus', function(request, response) {
   fetchStatus(request, response, function(status) {
     var params = resolveParams(request);
-    status.save({
-        clientId    : params.clientId,
-        groupId     : params.groupId,
-        date        : params.date,
-        participant : params.participant,
-        reply       : params.reply,
-        timestamp   : params.timestamp,
-        timezone    : params.timezone
-      }, {
+    var dataToSave = {
+      groupId     : params.groupId,
+      date        : params.date,
+      participant : params.participant,
+      reply       : params.reply,
+      timestamp   : params.timestamp,
+      timezone    : params.timezone
+    };
+    if (params.clientId) {
+      dataToSave.clientId = params.clientId;
+    }
+    status.save(dataToSave, {
       success: function(status) {
         response.success();
       },
@@ -139,8 +142,10 @@ define('getEvent', function(request, response) {
 
 fetchStatus = function(request, response, callback) {
   var params = resolveParams(request);
-  new Parse.Query('Status')
-    .equalTo('clientId', params.clientId)
+  var query = new Parse.Query('Status');
+  query = params.clientId ? query.equalTo('clientId', params.clientId)
+                          : query.equalTo('participant', params.participant);
+  query
     .equalTo('groupId', params.groupId)
     .equalTo('date', params.date)
     .find({

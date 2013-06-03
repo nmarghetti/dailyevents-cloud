@@ -34,6 +34,11 @@ class AcceptanceTest(unittest.TestCase):
         assert len(statuses) == len(participants)
         assert statuses[len(statuses) - 1]['reply'] == 'no'
 
+        self.__setStatus(None, groupId, 'gliguori', 'yes')
+        statuses = self.__getStatuses(groupId)
+        assert len(statuses) == len(participants)
+        assert statuses[len(statuses) - 1]['reply'] == 'yes'
+
     def test_should_add_comments(self):
         groupId = self.__createGroup()
         comments = {
@@ -68,14 +73,17 @@ class AcceptanceTest(unittest.TestCase):
             })['result']
 
     def __setStatus(self, clientId, groupId, participant, reply):
-        return self.__function('setStatus', {
-                'clientId'    : clientId,
-                'groupId'     : groupId,
-                'participant' : participant,
-                'reply'       : reply,
-                'timestamp'   : self.__timestamp(),
-                'timezone'    : self.__timezone()
-            })
+        status = {
+            'groupId'     : groupId,
+            'participant' : participant,
+            'reply'       : reply,
+            'timestamp'   : self.__timestamp(),
+            'timezone'    : self.__timezone()
+        }
+        if (clientId is not None):
+            status['clientId'] = clientId
+
+        return self.__function('setStatus', status)
 
     def __addComment(self, groupId, participant, comment):
         return self.__function('addComment', {
