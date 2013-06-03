@@ -1,29 +1,32 @@
 Parse.initialize(
   // Development
-  "uI57rIax4Tk31J5dI9EUKR3dCDhaeNphH2D0MmG1",
-  "E9GTKYZBjxPHuI0YIajAeKAtSeWZ4wzXJfysRq4g"
+  // "uI57rIax4Tk31J5dI9EUKR3dCDhaeNphH2D0MmG1",
+  // "E9GTKYZBjxPHuI0YIajAeKAtSeWZ4wzXJfysRq4g"
   
   // Production
-  // "Puuy52CoyWk3c5yOIubf3NPecyNdrNw7h4AAU7Qt",
-  // "inthUDhs4EiQT81QwnZbpMUe70PbJvzBn5wzYF5b"
+  "Puuy52CoyWk3c5yOIubf3NPecyNdrNw7h4AAU7Qt",
+  "inthUDhs4EiQT81QwnZbpMUe70PbJvzBn5wzYF5b"
 );
 
-var data = new Object();
+var data = {};
 
-function registerClient() {
-  data.clientId = $.cookie("clientId");
-  if (data.clientId) return; // already registered
-  
-  Parse.Cloud.run('register', { environment : navigator.userAgent }, {
-    success : function(result) {
-      data.clientId = result.id;
-      $.cookie("clientId", data.clientId, { expires : 3650 });
-    },
-    error : function(error) {
-      // TODO Show error message
-    }
-  });
-}
+var ui = {
+  buttons : {
+    refresh      : $('#refresh'),
+    reply_yes    : $('#reply_yes'),
+    reply_no     : $('#reply_no'),
+    add_comment  : $('#add_comment')
+  },
+  fields : {
+    display_name : $('#display_name'),
+    comment      : $('#comment')
+  },
+  labels : {
+    title        : $('#title'),
+    participants : $('#participants'),
+    comments     : $('#comments')
+  }
+};
 
 function refreshGroup() {
   if (!data.groupCode) return; // code not provided
@@ -35,50 +38,68 @@ function refreshGroup() {
       if (result.id) {
         data.groupId   = result.id;
         data.groupName = result.name;
+        ui.labels.title.text(data.groupName);
         document.title = data.groupName;
-        $('#title').text(data.groupName);
         refreshEvent();
       }
       else {
         data.groupCode = null;
-        enableOrDisableButtons();
+        disableButtons([
+          ui.buttons.refresh,
+          ui.buttons.reply_yes,
+          ui.buttons.reply_no,
+          ui.buttons.add_comment
+        ]);
       }
     },
     error : function(error) {
-      // TODO Show error message
     }
   });
 }
 
 function refreshEvent() {
   if (!data.groupId) return; // group not fetched
+  disableButtons([ui.buttons.refresh]);
+
   var today = new Date();
-  
   Parse.Cloud.run('getEvent', {
       groupId   : data.groupId,
       timestamp : today.getTime(),
       timezone  : today.getTimezoneOffset()
     }, {
     success : function(result) {
-      var statuses = result.statuses;
-      $("#participants").empty();
-      for (var i in statuses) {
-        if (statuses[i].reply == 'yes') {
-          $("#participants").append('<li>' + statuses[i].participant + '</li>');
-        }
-      }
-      var comments = result.comments;
-      $("#comments").empty();
-      for (var i in comments) {
-        var date  = new Date(parseInt(comments[i].timestamp));
-        var participant = toTwoDigits(date.getHours()) + ':' + toTwoDigits(date.getMinutes()) + ' ' + comments[i].participant;
-        $("#comments").append('<li>' + participant + ': ' + comments[i].comment + '</li>');
-      }
+      refreshStatuses(result.statuses);
+      refreshComments(result.comments);
+      enableButtons([ui.buttons.refresh]);
     },
     error: function(error) {
-      // TODO Show error message
+      enableButtons([ui.buttons.refresh]);
     }
   });
+}
+
+function refreshStatuses(statuses) {
+  var element = ui.labels.participants;
+  element.empty();
+  element.append('<li data-role="list-divider">Attending today</li>');
+  for (var i in statuses) {
+    if (statuses[i].reply == 'yes') {
+      element.append('<li>' + statuses[i].participant + '</li>');
+    }
+  }
+  element.listview('refresh');
+}
+
+function refreshComments(comments) {
+  var element = ui.labels.comments;
+  element.empty();
+  element.append('<li data-role="list-divider">Comments</li>');
+  for (var i in comments) {
+    var date  = new Date(parseInt(comments[i].timestamp));
+    var participant = toTwoDigits(date.getHours()) + ':' + toTwoDigits(date.getMinutes()) + ' ' + comments[i].participant;
+    element.append('<li>' + participant + ': ' + comments[i].comment + '</li>');
+  }
+  element.listview('refresh');
 }
 
 function confirmAttendance() {
@@ -91,10 +112,9 @@ function cancelAttendance() {
 
 function setStatus(reply) {
   if (!data.groupId) return; // group not fetched
-  var today = new Date();
-  
+  disableButtons([ui.buttons.reply_yes, ui.buttons.reply_no]);
+
   Parse.Cloud.run('setStatus', {
-      clientId    : data.clientId,
       groupId     : data.groupId,
       participant : getDisplayName(),
       reply       : reply,
@@ -103,19 +123,20 @@ function setStatus(reply) {
     }, {
     success : function(result) {
       refreshEvent();
+      enableButtons([ui.buttons.reply_yes, ui.buttons.reply_no]);
     },
     error : function(error) {
-      // TODO Show error message
+      enableButtons([ui.buttons.reply_yes, ui.buttons.reply_no]);
     }
   });
 }
 
 function addComment() {
-  var comment = $('#comment').val();
+  var comment = ui.fields.comment.val();
   if (!data.groupId || !comment) return; // group not fetched, or no comment to post
+  disableButtons([ui.buttons.add_comment]);
   
   Parse.Cloud.run('addComment', {
-      clientId    : data.clientId,
       groupId     : data.groupId,
       participant : getDisplayName(),
       comment     : comment,
@@ -123,51 +144,69 @@ function addComment() {
       timezone    : getTimezone()
     }, {
     success : function(result) {
-      $("#comment").val('');
+      ui.fields.comment.val('');
       refreshEvent();
+      enableButtons([ui.buttons.add_comment]);
     },
     error : function(error) {
-      // TODO Show error message
+      enableButtons([ui.buttons.add_comment]);
     }
   });
 }
 
 function readQueryParameters() {
   data.groupCode = $.url().param('code');
-  $('#display_name').val($.url().param('name'));
+  ui.fields.display_name.val($.url().param('name'));
 }
 
-function enableOrDisableButtons() {
-  var buttons = [$('#refresh'), $('#reply_yes'), $('#reply_no'), $('#add_comment')];
+function enableButtons(buttons) {
   for (var i in buttons) {
-    if (data.groupCode)
-      buttons[i].removeClass('ui-disabled');
-    else
-      buttons[i].addClass('ui-disabled');
+    buttons[i].removeClass('ui-disabled');
+  }
+}
+
+function disableButtons(buttons) {
+  for (var i in buttons) {
+    buttons[i].addClass('ui-disabled');
   }
 }
 
 function activateFieldValidation() {
-  var checkMaxLength = function(event) {
-    var value = $(this).val();
-    var maxLength = $(this).attr('maxlength');
-    if (value.length > maxLength) { 
-      $(this).val(value.substr(0, maxLength));
-    }
-  };
-  var fields = [$('#display_name'), $('#comment')];
+  var fields = [
+    ui.fields.display_name,
+    ui.fields.comment
+  ];
   for (var i in fields) {
     fields[i].keydown(checkMaxLength);
     fields[i].keyup(checkMaxLength);
   }
+  fields[0].change(checkDisplayName);
+  fields[0].keydown(checkDisplayName);
+  fields[0].keyup(checkDisplayName);
+}
+
+function checkMaxLength() {
+  var value = $(this).val();
+  var maxLength = $(this).attr('maxlength');
+  if (value.length > maxLength)
+    $(this).val(value.substr(0, maxLength));
+}
+
+function checkDisplayName() {
+  var buttons = [ui.buttons.reply_yes, ui.buttons.reply_no, ui.buttons.add_comment];
+  if ($(this).val().trim())
+    enableButtons(buttons);
+  else
+    disableButtons(buttons);
 }
 
 function bindActions() {
-  $("#refresh").bind("click", refreshEvent);
-  $("#reply_yes").bind("click", confirmAttendance);
-  $("#reply_no").bind("click", cancelAttendance);
-  $("#add_comment").bind("click", addComment);
-  $("#comment").keypress(function(e) {
+  ui.buttons.refresh.bind("click", refreshEvent);
+  ui.buttons.reply_yes.bind("click", confirmAttendance);
+  ui.buttons.reply_no.bind("click", cancelAttendance);
+  ui.buttons.add_comment.bind("click", addComment);
+
+  ui.fields.comment.keypress(function(e) {
     if (e.keyCode == 13) {
       addComment();
       e.preventDefault();
@@ -176,7 +215,7 @@ function bindActions() {
 }
 
 function getDisplayName() {
-  return $('#display_name').val();
+  return ui.fields.display_name.val();
 }
 
 function getTimestamp() {
@@ -192,10 +231,8 @@ function toTwoDigits(intValue) {
 }
 
 $(document).ready(function() {
-  registerClient();
   readQueryParameters();
   activateFieldValidation();
-  enableOrDisableButtons();
-  refreshGroup();
   bindActions();
+  refreshGroup();
 });
