@@ -12,42 +12,48 @@ var data = new Object();
 
 function registerClient() {
   data.clientId = $.cookie("clientId");
-  if (!data.clientId)
-    Parse.Cloud.run('register', { environment : navigator.userAgent }, {
-      success : function(result) {
-        data.clientId = result.id;
-        $.cookie("clientId", data.clientId, { expires : 3650 });
-      },
-      error : function(error) {
-        // TODO Show error message
-      }
-    });
+  if (data.clientId) return; // already registered
+  
+  Parse.Cloud.run('register', { environment : navigator.userAgent }, {
+    success : function(result) {
+      data.clientId = result.id;
+      $.cookie("clientId", data.clientId, { expires : 3650 });
+    },
+    error : function(error) {
+      // TODO Show error message
+    }
+  });
 }
 
 function refreshGroup() {
-  if (data.groupCode)
-    Parse.Cloud.run('getGroupByCode', { code : data.groupCode }, {
-      success : function(result) {
-        if (result.id) {
-          data.groupId   = result.id;
-          data.groupName = result.name;
-          document.title = data.groupName;
-          $('#title').text(data.groupName);
-          refreshEvent();
-        }
-        else {
-          data.groupCode = null;
-          enableOrDisableButtons();
-        }
-      },
-      error : function(error) {
-        // TODO Show error message
+  if (!data.groupCode) return; // code not provided
+  
+  Parse.Cloud.run('getGroupByCode', {
+      code : data.groupCode
+    }, {
+    success : function(result) {
+      if (result.id) {
+        data.groupId   = result.id;
+        data.groupName = result.name;
+        document.title = data.groupName;
+        $('#title').text(data.groupName);
+        refreshEvent();
       }
-    });
+      else {
+        data.groupCode = null;
+        enableOrDisableButtons();
+      }
+    },
+    error : function(error) {
+      // TODO Show error message
+    }
+  });
 }
 
 function refreshEvent() {
+  if (!data.groupId) return; // group not fetched
   var today = new Date();
+  
   Parse.Cloud.run('getEvent', {
       groupId   : data.groupId,
       timestamp : today.getTime(),
@@ -84,7 +90,9 @@ function cancelAttendance() {
 }
 
 function setStatus(reply) {
+  if (!data.groupId) return; // group not fetched
   var today = new Date();
+  
   Parse.Cloud.run('setStatus', {
       clientId    : data.clientId,
       groupId     : data.groupId,
@@ -104,23 +112,24 @@ function setStatus(reply) {
 
 function addComment() {
   var comment = $('#comment').val();
-  if (comment)
-    Parse.Cloud.run('addComment', {
-        clientId    : data.clientId,
-        groupId     : data.groupId,
-        participant : getDisplayName(),
-        comment     : comment,
-        timestamp   : getTimestamp(),
-        timezone    : getTimezone()
-      }, {
-      success : function(result) {
-        $("#comment").val('');
-        refreshEvent();
-      },
-      error : function(error) {
-        // TODO Show error message
-      }
-    });
+  if (!data.groupId || !comment) return; // group not fetched, or no comment to post
+  
+  Parse.Cloud.run('addComment', {
+      clientId    : data.clientId,
+      groupId     : data.groupId,
+      participant : getDisplayName(),
+      comment     : comment,
+      timestamp   : getTimestamp(),
+      timezone    : getTimezone()
+    }, {
+    success : function(result) {
+      $("#comment").val('');
+      refreshEvent();
+    },
+    error : function(error) {
+      // TODO Show error message
+    }
+  });
 }
 
 function readQueryParameters() {
@@ -158,7 +167,6 @@ function bindActions() {
   $("#reply_yes").bind("click", confirmAttendance);
   $("#reply_no").bind("click", cancelAttendance);
   $("#add_comment").bind("click", addComment);
-
   $("#comment").keypress(function(e) {
     if (e.keyCode == 13) {
       addComment();
