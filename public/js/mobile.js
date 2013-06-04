@@ -132,7 +132,7 @@ function setStatus(reply) {
 }
 
 function addComment() {
-  var comment = ui.fields.comment.val();
+  var comment = ui.fields.comment.val().trim();
   if (!data.groupId || !comment) return; // group not fetched, or no comment to post
   disableButtons([ui.buttons.add_comment]);
   
