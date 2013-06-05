@@ -97,7 +97,7 @@ function refreshComments(comments) {
   for (var i in comments) {
     var date  = new Date(parseInt(comments[i].timestamp));
     var participant = toTwoDigits(date.getHours()) + ':' + toTwoDigits(date.getMinutes()) + ' ' + comments[i].participant;
-    element.append('<li>' + participant + ': ' + comments[i].comment + '</li>');
+    element.append('<li>' + participant + ': ' + linkify(comments[i].comment) + '</li>');
   }
   element.listview('refresh');
 }
@@ -224,6 +224,11 @@ function getTimestamp() {
 
 function getTimezone() {
   return new Date().getTimezoneOffset().toString();
+}
+
+function linkify(text) {
+  var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+  return text.replace(exp, "<a href='$1'>$1</a>"); 
 }
 
 function toTwoDigits(intValue) {
