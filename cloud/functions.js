@@ -142,18 +142,24 @@ define('getEvent', function(request, response) {
 
 fetchStatus = function(request, response, callback) {
   var params = resolveParams(request);
-  var query = new Parse.Query('Status');
-  query = params.clientId ? query.equalTo('clientId', params.clientId)
-                          : query.equalTo('participant', params.participant);
-  query
+
+  var queryByClientId = new Parse.Query('Status')
+    .equalTo('clientId', params.clientId)
     .equalTo('groupId', params.groupId)
-    .equalTo('date', params.date)
+    .equalTo('date', params.date);
+
+  var queryByParticipant = new Parse.Query('Status')
+    .equalTo('participant', params.participant)
+    .equalTo('groupId', params.groupId)
+    .equalTo('date', params.date);
+
+  (params.clientId ? Parse.Query.or(queryByParticipant, queryByClientId) : queryByParticipant)
     .find({
       success : function(statuses) {
-        if (statuses.length == 1)
-          callback(statuses[0]);
-        else
+        if (statuses.length == 0)
           callback(new Parse.Object('Status'));
+        else
+          callback(statuses[0]);
       },
       error : function(error) {
         response.error(error);

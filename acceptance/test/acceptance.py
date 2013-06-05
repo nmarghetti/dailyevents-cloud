@@ -25,16 +25,31 @@ class AcceptanceTest(unittest.TestCase):
             'ewatanabe'  : 'yes',
             'gliguori'   : 'yes'
         }
+        # Reply directly from web
         for participant, reply in participants.items():
-            self.__setStatus(participant + '-device', groupId, participant, reply)
+            self.__setStatus(None, groupId, participant, reply)
         assert len(self.__getStatuses(groupId)) == len(participants)
         
-        self.__setStatus('gliguori-device', groupId, 'gliguori', 'no')
+        # Change status on device
+        self.__setStatus('test-device', groupId, 'gliguori', 'no')
         statuses = self.__getStatuses(groupId)
         assert len(statuses) == len(participants)
         assert statuses[len(statuses) - 1]['reply'] == 'no'
 
+        # Change status yet again on the web
         self.__setStatus(None, groupId, 'gliguori', 'yes')
+        statuses = self.__getStatuses(groupId)
+        assert len(statuses) == len(participants)
+        assert statuses[len(statuses) - 1]['reply'] == 'yes'
+        
+        # Change status yet again on the same device
+        self.__setStatus('test-device', groupId, 'gliguori', 'no')
+        statuses = self.__getStatuses(groupId)
+        assert len(statuses) == len(participants)
+        assert statuses[len(statuses) - 1]['reply'] == 'no'
+        
+        # Modify display name and change status yet again on the same device
+        self.__setStatus('test-device', groupId, 'gliguori-2', 'yes')
         statuses = self.__getStatuses(groupId)
         assert len(statuses) == len(participants)
         assert statuses[len(statuses) - 1]['reply'] == 'yes'
