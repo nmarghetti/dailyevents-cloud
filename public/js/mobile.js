@@ -81,11 +81,15 @@ function refreshEvent() {
 function refreshStatuses(statuses) {
   var element = ui.labels.participants;
   element.empty();
-  element.append('<li data-role="list-divider">Attending today</li>');
+  element.append($('<li/>', {
+    'data-role' : 'list-divider',
+    'text'      : 'Attending today'
+  }));
   for (var i in statuses) {
-    if (statuses[i].reply == 'yes') {
-      element.append('<li>' + statuses[i].participant + '</li>');
-    }
+    if (statuses[i].reply == 'yes')
+      element.append($('<li/>', {
+        'text' : statuses[i].participant
+      }));
   }
   element.listview('refresh');
 }
@@ -93,13 +97,26 @@ function refreshStatuses(statuses) {
 function refreshComments(comments) {
   var element = ui.labels.comments;
   element.empty();
-  element.append('<li data-role="list-divider">Comments</li>');
+  element.append($('<li/>', {
+    'data-role' : 'list-divider',
+    'text'      : 'Comments'
+  }));
   for (var i in comments) {
     var date  = new Date(parseInt(comments[i].timestamp));
     var participant = toTwoDigits(date.getHours()) + ':' + toTwoDigits(date.getMinutes()) + ' ' + comments[i].participant;
-    element.append('<li>' + participant + ': ' + linkify(comments[i].comment) + '</li>');
+    var item = $('<li/>', {
+      'data-icon' : 'false',
+      'html'      : participant + ': ' + linkify(comments[i].comment)
+    });
+    item.addClass('ui-li-static');
+    element.append(item);
   }
   element.listview('refresh');
+}
+
+function linkify(text) {
+  var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+  return text.replace(exp, '<a href="$1">$1</a>'); 
 }
 
 function confirmAttendance() {
@@ -224,11 +241,6 @@ function getTimestamp() {
 
 function getTimezone() {
   return new Date().getTimezoneOffset().toString();
-}
-
-function linkify(text) {
-  var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-  return text.replace(exp, "<a href='$1'>$1</a>"); 
 }
 
 function toTwoDigits(intValue) {

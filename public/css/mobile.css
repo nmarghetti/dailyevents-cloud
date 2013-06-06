@@ -10,3 +10,8 @@
 .ui-btn-hover-b {
   background: linear-gradient(#51B9DB, #0687B2) repeat scroll 0 0 #209EC7;
 }
+
+a.ui-link-inherit {
+  display: inline !important;
+  padding-left: 0px !important;
+}
