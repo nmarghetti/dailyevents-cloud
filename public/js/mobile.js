@@ -29,53 +29,76 @@ var ui = {
 };
 
 function refreshGroup() {
-  if (!data.groupCode) return; // code not provided
-  
-  Parse.Cloud.run('getGroupByCode', {
-      code : data.groupCode
-    }, {
-    success : function(result) {
-      if (result.id) {
-        data.groupId   = result.id;
-        data.groupName = result.name;
-        ui.labels.title.text(data.groupName);
-        document.title = data.groupName;
-        refreshEvent();
+  if (!data.groupCode) {
+    showErrorMessage("Unknown group");
+    disableElements([
+      ui.fields.display_name,
+      ui.fields.comment,
+      ui.buttons.refresh,
+      ui.buttons.reply_yes,
+      ui.buttons.reply_no,
+      ui.buttons.add_comment
+    ]);
+  }
+  else {
+    showLoadingMessage();
+    Parse.Cloud.run('getGroupByCode', {
+        code : data.groupCode
+      }, {
+      success : function(result) {
+        if (result.id) {
+          data.groupId   = result.id;
+          data.groupName = result.name;
+          ui.labels.title.text(data.groupName);
+          document.title = data.groupName;
+          refreshEvent();
+        }
+        else {
+          data.groupCode = null;
+          disableElements([
+            ui.buttons.refresh,
+            ui.buttons.reply_yes,
+            ui.buttons.reply_no,
+            ui.buttons.add_comment
+          ]);
+        }
+        hideLoadingMessage();
+      },
+      error : function(error) {
+        hideLoadingMessage();
+        showNetworkError();
       }
-      else {
-        data.groupCode = null;
-        disableButtons([
-          ui.buttons.refresh,
-          ui.buttons.reply_yes,
-          ui.buttons.reply_no,
-          ui.buttons.add_comment
-        ]);
-      }
-    },
-    error : function(error) {
-    }
-  });
+    });
+  }
 }
 
 function refreshEvent() {
-  if (!data.groupId) return; // group not fetched
-  disableButtons([ui.buttons.refresh]);
+  if (!data.groupId) {
+    refreshGroup();
+  }
+  else {
+    var today = new Date();
+    disableElements([ui.buttons.refresh]);
+    showLoadingMessage('Refreshing event...');
 
-  var today = new Date();
-  Parse.Cloud.run('getEvent', {
-      groupId   : data.groupId,
-      timestamp : today.getTime(),
-      timezone  : today.getTimezoneOffset()
-    }, {
-    success : function(result) {
-      refreshStatuses(result.statuses);
-      refreshComments(result.comments);
-      enableButtons([ui.buttons.refresh]);
-    },
-    error: function(error) {
-      enableButtons([ui.buttons.refresh]);
-    }
-  });
+    Parse.Cloud.run('getEvent', {
+        groupId   : data.groupId,
+        timestamp : today.getTime(),
+        timezone  : today.getTimezoneOffset()
+      }, {
+      success : function(result) {
+        refreshStatuses(result.statuses);
+        refreshComments(result.comments);
+        enableElements([ui.buttons.refresh]);
+        hideLoadingMessage();
+      },
+      error : function(error) {
+        hideLoadingMessage();
+        showNetworkError();
+        enableElements([ui.buttons.refresh]);
+      }
+    });
+  }
 }
 
 function refreshStatuses(statuses) {
@@ -128,47 +151,72 @@ function cancelAttendance() {
 }
 
 function setStatus(reply) {
-  if (!data.groupId) return; // group not fetched
-  disableButtons([ui.buttons.reply_yes, ui.buttons.reply_no]);
+  var displayName = getDisplayName();
 
-  Parse.Cloud.run('setStatus', {
-      groupId     : data.groupId,
-      participant : getDisplayName(),
-      reply       : reply,
-      timestamp   : getTimestamp(),
-      timezone    : getTimezone()
-    }, {
-    success : function(result) {
-      refreshEvent();
-      enableButtons([ui.buttons.reply_yes, ui.buttons.reply_no]);
-    },
-    error : function(error) {
-      enableButtons([ui.buttons.reply_yes, ui.buttons.reply_no]);
-    }
-  });
+  if (!data.groupId) {
+    refreshGroup();
+  }
+  else if (!displayName) {
+    showErrorMessage('Enter your display name');
+  }
+  else {
+    disableElements([ui.buttons.reply_yes, ui.buttons.reply_no]);
+    showLoadingMessage('Sending reply...')
+
+    Parse.Cloud.run('setStatus', {
+        groupId     : data.groupId,
+        participant : getDisplayName(),
+        reply       : reply,
+        timestamp   : getTimestamp(),
+        timezone    : getTimezone()
+      }, {
+      success : function(result) {
+        hideLoadingMessage();
+        refreshEvent();
+        enableElements([ui.buttons.reply_yes, ui.buttons.reply_no]);
+      },
+      error : function(error) {
+        hideLoadingMessage();
+        showNetworkError();
+        enableElements([ui.buttons.reply_yes, ui.buttons.reply_no]);
+      }
+    });
+  }
 }
 
 function addComment() {
-  var comment = ui.fields.comment.val().trim();
-  if (!data.groupId || !comment) return; // group not fetched, or no comment to post
-  disableButtons([ui.buttons.add_comment]);
-  
-  Parse.Cloud.run('addComment', {
-      groupId     : data.groupId,
-      participant : getDisplayName(),
-      comment     : comment,
-      timestamp   : getTimestamp(),
-      timezone    : getTimezone()
-    }, {
-    success : function(result) {
-      ui.fields.comment.val('');
-      refreshEvent();
-      enableButtons([ui.buttons.add_comment]);
-    },
-    error : function(error) {
-      enableButtons([ui.buttons.add_comment]);
-    }
-  });
+  var comment = getComment();
+
+  if (!data.groupId) {
+    refreshGroup();
+  }
+  else if (!comment) {
+    showErrorMessage('Enter your comment');
+  }
+  else {
+    disableElements([ui.buttons.add_comment]);
+    showLoadingMessage('Adding comment...');
+    
+    Parse.Cloud.run('addComment', {
+        groupId     : data.groupId,
+        participant : getDisplayName(),
+        comment     : comment,
+        timestamp   : getTimestamp(),
+        timezone    : getTimezone()
+      }, {
+      success : function(result) {
+        hideLoadingMessage();
+        ui.fields.comment.val('');
+        refreshEvent();
+        enableElements([ui.buttons.add_comment]);
+      },
+      error : function(error) {
+        hideLoadingMessage();
+        showNetworkError();
+        enableElements([ui.buttons.add_comment]);
+      }
+    });
+  }
 }
 
 function readQueryParameters() {
@@ -176,15 +224,15 @@ function readQueryParameters() {
   ui.fields.display_name.val($.url().param('name'));
 }
 
-function enableButtons(buttons) {
-  for (var i in buttons) {
-    buttons[i].removeClass('ui-disabled');
+function enableElements(elements) {
+  for (var i in elements) {
+    elements[i].removeClass('ui-disabled');
   }
 }
 
-function disableButtons(buttons) {
-  for (var i in buttons) {
-    buttons[i].addClass('ui-disabled');
+function disableElements(elements) {
+  for (var i in elements) {
+    elements[i].addClass('ui-disabled');
   }
 }
 
@@ -212,9 +260,9 @@ function checkMaxLength() {
 function checkDisplayName() {
   var buttons = [ui.buttons.reply_yes, ui.buttons.reply_no, ui.buttons.add_comment];
   if ($(this).val().trim())
-    enableButtons(buttons);
+    enableElements(buttons);
   else
-    disableButtons(buttons);
+    disableElements(buttons);
 }
 
 function bindActions() {
@@ -231,8 +279,30 @@ function bindActions() {
   });
 }
 
+function showLoadingMessage(message) {
+  message = message || 'Loading...';
+  $.mobile.showPageLoadingMsg('a', message);
+}
+
+function hideLoadingMessage() {
+  $.mobile.hidePageLoadingMsg();
+}
+
+function showNetworkError() {
+  showErrorMessage('Network error');
+}
+
+function showErrorMessage(message) {
+  $.mobile.showPageLoadingMsg("e", message, true);
+  setTimeout(hideLoadingMessage, 3000);
+}
+
 function getDisplayName() {
-  return ui.fields.display_name.val();
+  return ui.fields.display_name.val().trim();
+}
+
+function getComment() {
+  return ui.fields.comment.val().trim();
 }
 
 function getTimestamp() {
