@@ -3,9 +3,9 @@
 
   "feedback_url" : "mailto:tiago.fernandez@gmail.com",
   
-  "marketing_url" : "http://dailyevents.parseapp.com",
+  "marketing_url" : "http://dailyevents.mobi",
   
   "windows" : {
-    "latest_version" : "1.0.1"
+    "latest_version" : "1.0.2"
   }
 }
