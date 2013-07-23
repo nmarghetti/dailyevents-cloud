@@ -14,5 +14,10 @@
         "*.min.*"
       ]
     }
-	]
+	],
+	"settings":
+	{
+			// http://github.com/sobstel/SyncedSideBar
+			"reveal-on-activate": true
+	}
 }
