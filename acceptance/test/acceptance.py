@@ -4,12 +4,15 @@ import time
 
 from dailyevents.api import ParseClient
 
+
 class AcceptanceTest(unittest.TestCase):
+
 
     def test_should_register_new_user(self):
         clientId = self.__register()
         assert clientId
     
+
     def test_should_create_and_retrieve_group(self):
         groupId = self.__createGroup()
         assert groupId
@@ -18,6 +21,7 @@ class AcceptanceTest(unittest.TestCase):
         group = self.__getGroupByCode(group['code'])
         assert group['id']
     
+
     def test_should_confirm_and_cancel_attendance(self):
         groupId = self.__createGroup()
         participants = {
@@ -54,6 +58,7 @@ class AcceptanceTest(unittest.TestCase):
         assert len(statuses) == len(participants)
         assert statuses[len(statuses) - 1]['reply'] == 'yes'
 
+
     def test_should_add_comments(self):
         groupId = self.__createGroup()
         comments = {
@@ -65,27 +70,34 @@ class AcceptanceTest(unittest.TestCase):
             self.__addComment(groupId, participant, comment)
         assert len(self.__getComments(groupId)) == len(comments)
 
+
     def __register(self):
         response = self.__function('register', {
                 'environment' : platform.platform()
             })
         return response['result']['id']
 
+
     def __createGroup(self):
         response = self.__function('createGroup', {
-                'name' : 'Acceptance Test'
+                'name'        : 'Acceptance Test',
+                'description' : 'Group used for acceptance testing.',
+                'time'        : '11:50'
             })
         return response['result']['id']
+
 
     def __getGroupById(self, groupId):
         return self.__function('getGroupById', {
                 'id' : groupId
             })['result']
 
+
     def __getGroupByCode(self, groupCode):
         return self.__function('getGroupByCode', {
                 'code' : groupCode
             })['result']
+
 
     def __setStatus(self, clientId, groupId, participant, reply):
         status = {
@@ -100,6 +112,7 @@ class AcceptanceTest(unittest.TestCase):
 
         return self.__function('setStatus', status)
 
+
     def __addComment(self, groupId, participant, comment):
         return self.__function('addComment', {
                 'clientId'    : 'test-device',
@@ -110,11 +123,14 @@ class AcceptanceTest(unittest.TestCase):
                 'timezone'    : self.__timezone()
             })
 
+
     def __getStatuses(self, groupId):
         return self.__getEvent(groupId)['statuses']
 
+
     def __getComments(self, groupId):
         return self.__getEvent(groupId)['comments']
+
 
     def __getEvent(self, groupId):
         return self.__function('getEvent', {
@@ -126,8 +142,10 @@ class AcceptanceTest(unittest.TestCase):
     def __function(self, name, params={}):
         return ParseClient().call_function(name, params)
 
+
     def __timestamp(self):
         return str(time.time() * 1000)
+
 
     def __timezone(self):
         return str(time.altzone / 60)

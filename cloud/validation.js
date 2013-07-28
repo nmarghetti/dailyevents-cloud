@@ -18,7 +18,7 @@ beforeSave('Group', function(request, response) {
   _.each(['code', 'name'], function(field) {
     ensureContains(request, field, errors);
   });
-  _.each({ 'code' : 15, 'name' : 30 }, function(maxLength, field) {
+  _.each({ 'code' : 15, 'name' : 30, 'description' : 70, 'time' : 5 }, function(maxLength, field) {
     ensureMaxLength(request, field, maxLength, errors);
   });
   if (errors.length == 0)
@@ -67,11 +67,13 @@ ensureContains = function(request, key, errors) {
 };
 
 ensureLength = function(request, key, length, errors) {
-  if (request.object.get(key).length != length)
+  var value = request.object.get(key);
+  if (value && value.length != length)
     errors.push(key + ' must have exactly' + length + ' characters');
 };
 
 ensureMaxLength = function(request, key, maxLength, errors) {
-  if (request.object.get(key).length > maxLength)
+  var value = request.object.get(key);
+  if (value && value.length > maxLength)
     errors.push(key + ' cannot have more than ' + maxLength + ' characters');
 };

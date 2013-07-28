@@ -18,8 +18,10 @@ define('register', function(request, response) {
 
 define('createGroup', function(request, response) {
   new Parse.Object('Group').save({
-      code : utils.uniqueId(),
-      name : request.params.name
+      code        : utils.uniqueId(),
+      name        : request.params.name,
+      description : request.params.description,
+      time        : request.params.time
     }, {
     success: function(group) {
       response.success({ id : group.id });
@@ -36,8 +38,10 @@ define('getGroupById', function(request, response) {
       success : function(group) {
         if (group)
           response.success({
-            code : group.get('code'),
-            name : group.get('name')
+            code        : group.get('code'),
+            name        : group.get('name'),
+            description : group.get('description'),
+            time        : group.get('time')
           });
         else
           response.success({});
@@ -56,8 +60,10 @@ define('getGroupByCode', function(request, response) {
       success : function(groups) {
         if (groups.length == 1)
           response.success({
-            id   : groups[0].id,
-            name : groups[0].get('name')
+            id          : groups[0].id,
+            name        : groups[0].get('name'),
+            description : groups[0].get('description'),
+            time        : groups[0].get('time')
           });
         else
           response.success({});

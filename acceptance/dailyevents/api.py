@@ -1,12 +1,15 @@
 from urllib import request
 import json, http.client
 
+
 class ParseClient:
+
     
     def __init__(self):
         self.connection = http.client.HTTPSConnection('api.parse.com', 443)
         self.connection.connect()
     
+
     def call_function(self, name, params={}):
         path = "/1/functions/{0}".format(name)
         print('\n' + path)
