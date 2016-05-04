@@ -1,12 +1,9 @@
 Parse.initialize(
-  // Development
-  // "uI57rIax4Tk31J5dI9EUKR3dCDhaeNphH2D0MmG1",
-  // "E9GTKYZBjxPHuI0YIajAeKAtSeWZ4wzXJfysRq4g"
-  
-  // Production
-  "Puuy52CoyWk3c5yOIubf3NPecyNdrNw7h4AAU7Qt",
-  "inthUDhs4EiQT81QwnZbpMUe70PbJvzBn5wzYF5b"
+  "Puuy52CoyWk3c5yOIubf3NPecyNdrNw7h4AAU7Qt", // App ID
+  "inthUDhs4EiQT81QwnZbpMUe70PbJvzBn5wzYF5b", // JavaScript key
+  "kFKmW34AIIYbHg1fqsFTFm0zfqLks4EcIIb40JXq"  // Master key
 );
+Parse.serverURL = "https://parseapi.back4app.com";
 
 var data = {};
 
