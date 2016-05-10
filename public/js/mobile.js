@@ -3,7 +3,7 @@ Parse.initialize(
   "inthUDhs4EiQT81QwnZbpMUe70PbJvzBn5wzYF5b", // JavaScript key
   "kFKmW34AIIYbHg1fqsFTFm0zfqLks4EcIIb40JXq"  // Master key
 );
-Parse.serverURL = "https://parseapi.back4app.com";
+// Parse.serverURL = "https://parseapi.back4app.com";
 
 var data = {};
 
