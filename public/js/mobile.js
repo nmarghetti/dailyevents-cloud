@@ -1,9 +1,9 @@
 Parse.initialize(
-  "Puuy52CoyWk3c5yOIubf3NPecyNdrNw7h4AAU7Qt", // App ID
-  "inthUDhs4EiQT81QwnZbpMUe70PbJvzBn5wzYF5b", // JavaScript key
-  "kFKmW34AIIYbHg1fqsFTFm0zfqLks4EcIIb40JXq"  // Master key
+  "OM6MTeOzj8Y5exBdXTCgCB97JqY1KaVOCFjEvcXJ", // App ID
+  "fZeyTsabyz9phwCzXS52a5ABDrorWAleVbpYEIRb", // JavaScript key
+  "hzuAv64exUWW6nOqQx0FYq53Kimbwe5T67rstWT6"  // Master key
 );
-// Parse.serverURL = "https://parseapi.back4app.com";
+Parse.serverURL = "https://parseapi.back4app.com";
 
 var data = {};
 
@@ -27,7 +27,7 @@ var ui = {
 
 function refreshGroup() {
   if (!data.groupCode) {
-    showErrorMessage("Unknown group");
+    showErrorMessage("No group parameter");
     disableElements([
       ui.fields.display_name,
       ui.fields.comment,
@@ -58,8 +58,8 @@ function refreshGroup() {
             ui.buttons.reply_no,
             ui.buttons.add_comment
           ]);
+          showErrorMessage("Unknown group");
         }
-        hideLoadingMessage();
       },
       error : function(error) {
         hideLoadingMessage();
@@ -183,9 +183,13 @@ function setStatus(reply) {
 
 function addComment() {
   var comment = getComment();
+  var displayName = getDisplayName();
 
   if (!data.groupId) {
     refreshGroup();
+  }
+  else if (!displayName) {
+      showErrorMessage('Enter your display name');
   }
   else if (!comment) {
     showErrorMessage('Enter your comment');
@@ -278,11 +282,11 @@ function bindActions() {
 
 function showLoadingMessage(message) {
   message = message || 'Loading...';
-  $.mobile.showPageLoadingMsg('a', message);
+  $.mobile.loading("show", {theme: 'a', text: message, textVisible: true});
 }
 
 function hideLoadingMessage() {
-  $.mobile.hidePageLoadingMsg();
+  $.mobile.loading("hide");
 }
 
 function showNetworkError() {
@@ -290,7 +294,7 @@ function showNetworkError() {
 }
 
 function showErrorMessage(message) {
-  $.mobile.showPageLoadingMsg("e", message, true);
+  $.mobile.loading("show", {theme: 'e', text: message, textVisible: true});
   setTimeout(hideLoadingMessage, 3000);
 }
 

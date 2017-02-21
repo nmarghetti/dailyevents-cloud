@@ -14,8 +14,8 @@ class ParseClient:
         path = "/1/functions/{0}".format(name)
         print('\n' + path)
         self.connection.request('POST', path, json.dumps(params), {
-             'X-Parse-Application-Id' : 'uI57rIax4Tk31J5dI9EUKR3dCDhaeNphH2D0MmG1',
-             'X-Parse-REST-API-Key'   : 'kNPRXb7CGw0wkYiK9DtBnGWAtOgdyX6yqQqLMY2X',
+             'X-Parse-Application-Id' : 'OM6MTeOzj8Y5exBdXTCgCB97JqY1KaVOCFjEvcXJ',
+             'X-Parse-REST-API-Key'   : 'vLVQmSP1iKBVK5XyiAmXiROD0VfvW7SjT5afwcn9',
              'Content-Type'           : 'application/json'
             })
         response = self.connection.getresponse().read().decode()

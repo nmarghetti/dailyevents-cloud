@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "DailyEvent": {
+      "applicationId": "OM6MTeOzj8Y5exBdXTCgCB97JqY1KaVOCFjEvcXJ"
+    },
+    "_default": {
+      "link": "DailyEvent"
+    }
+  }
+}

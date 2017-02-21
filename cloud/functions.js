@@ -1,5 +1,5 @@
 var     _ = require('underscore'),
-    utils = require('cloud/utils');
+    utils = require('./utils.js');
 
 var define = Parse.Cloud.define;
 
@@ -90,7 +90,7 @@ define('setStatus', function(request, response) {
     }
     status.save(dataToSave, {
       success: function(status) {
-        response.success();
+        response.success({});
       },
       error: function(status, error) {
         response.error(error);
@@ -111,7 +111,7 @@ define('addComment', function(request, response) {
       timezone    : params.timezone
     }, {
     success: function(comment) {
-      response.success();
+      response.success({});
     },
     error: function(comment, error) {
       response.error(error);

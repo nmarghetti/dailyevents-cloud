@@ -3,9 +3,9 @@
 
   "feedback_url" : "mailto:tiago.fernandez@gmail.com",
   
-  "marketing_url" : "http://dailyevents.mobi",
+  "marketing_url" : "http://dailyevent.back4app.io/",
   
   "windows" : {
-    "latest_version" : "1.0.4"
+    "latest_version" : "1.0.6"
   }
 }
